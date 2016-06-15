@@ -10,7 +10,7 @@ When you installed these, clone this repository :
 `$ git clone https://github.com/gick/game-server`
 
 ##Configuration instructions
-From web server root directory, edit /app/config/config.js, the variable webDirectory should have a string value indicating the path to reveries-game client application (see https://github.com/gick/reveries-game for client installation instructions).
+From web server root directory, edit /app/config/config.js, the variable webDirectory should have a string value indicating the path to reveries-game client application (see <https://github.com/gick/reveries-project> for client installation instructions).
 
 From the game server root directory, install dependencies with npm : 
 
