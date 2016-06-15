@@ -1,7 +1,6 @@
 module.exports = function(app) {
 
-    // normal routes ===============================================================
-    var User = require('../models/user.js');
+    // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
 
     app.get('/listActivities', function(req, res) {
