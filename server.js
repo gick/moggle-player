@@ -4,13 +4,6 @@
 // get all the tools we need
 var fs = require('fs');
 var express  = require('express');
-var https = require('https');
-var key = fs.readFileSync('/home/gicquel/certif/key.pem');
-var cert = fs.readFileSync('/home/gicquel/certif/cert.pem')
-var https_options = {
-    key: key,
-    cert: cert
-};
 var PORT = 8080;
 var HOST = 'localhost';
 
@@ -55,4 +48,4 @@ require('./app/route/documentroutes.js')(app);
 // launch ======================================================================
 //server = https.createServer(https_options, app).listen(PORT);
 app.listen(PORT)
-console.log('HTTPS Server listening on %s:%s', HOST, PORT);
+
