@@ -11,7 +11,7 @@ var https_options = {
     key: key,
     cert: cert
 };
-var PORT = 443;
+var PORT = 8080;
 var HOST = 'localhost';
 
 var app      = express();
@@ -53,5 +53,6 @@ require('./app/route/filesroutes.js')(app, passport,gfs); // load our routes and
 require('./app/route/documentroutes.js')(app);
 
 // launch ======================================================================
-server = https.createServer(https_options, app).listen(PORT);
+//server = https.createServer(https_options, app).listen(PORT);
+app.listen(PORT)
 console.log('HTTPS Server listening on %s:%s', HOST, PORT);
