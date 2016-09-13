@@ -1,20 +1,10 @@
-module.exports = function(app,gfs) {
-
-    // Route for serving dynamic content (documents stored in mongodb)
-    var Game = require('../models/game.js')
+module.exports = function(app, gfs) {
     app.get('/listAllFiles', function(req, res) {
-    	console.log(req)
         gfs.files.find({}).toArray(function(err, files) {
             res.send(files);
         })
     });
 
-    app.get('/listActivities', function(req, res) {
-       Game.find({},function(err,game){
-        console.log(err)
-        res.send(game)
-       })
-    });
 
  app.get('/file/:id', function(req, res) {
                     console.log(req)
@@ -92,6 +82,4 @@ module.exports = function(app,gfs) {
 
         }
     });
-
-
 }

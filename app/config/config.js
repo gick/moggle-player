@@ -1,2 +1,2 @@
-var webDirectory = '/home/gicquel/reveries-games';
+var webDirectory = '/home/gicquel/rev-games';
 module.exports = webDirectory
