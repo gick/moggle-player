@@ -1,23 +1,36 @@
-module.exports = function(app,gfs) {
+module.exports = function(app, gfs) {
 
     // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
-    app.get('/listAllFiles', function(req, res) {
-    	console.log(req)
+    var MLG = require('../models/mlg.js')
+
+    app.get('/listAllFiles', function(req,
+        res) {
+        console.log(req)
         gfs.files.find({}).toArray(function(err, files) {
             res.send(files);
         })
     });
 
-    app.get('/listActivities', function(req, res) {
-       Game.find({},function(err,game){
-        console.log(err)
-        res.send(game)
-       })
+    app.get('/mlg', function(req, res) {
+        Game.find({}, function(err, game) {
+            console.log(err)
+            res.send(game)
+        })
     });
+    //handle reception lgof a complete game
+    app.post('/mlg', function(req, res) {
+        var newMLG = new MLG();
+        var toSend={activityName:req.body.activityName}
+    })
 
- app.get('/file/:id', function(req, res) {
-                    console.log(req)
+
+
+
+
+
+    app.get('/file/:id', function(req, res) {
+        console.log(req)
         if (req.headers.range) {
             gfs.findOne({
                 _id: req.params.id

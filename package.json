@@ -1,10 +1,36 @@
 {
-  "name": "rev-server",
-  "main": "server.js",
-  "dependencies": {
-    "bcrypt-nodejs": "latest",
-    "express": "~4.0.0",
-    "mongoose": "latest",
-    "bson" : "latest"
-  }
+    "name": "generator-rev-server",
+    "dependencies": {
+        "yeoman-generator": "^0.24.1",
+        "bcrypt-nodejs": "latest",
+        "express": "~4.0.0",
+        "mongoose": "latest",
+        "bson": "latest"
+    },
+    "scripts": {
+        "start": "node server.js"
+    },
+    "description": "You will need at least node v5, and mongodb 3.2.5 Installing node for mac or windows : https://nodejs.org/en/download/current/ Installing mongodb for mac, windows or linux : https://www.mongodb.com/download-center#community",
+    "version": "1.0.0",
+    "devDependencies": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gick/game-servers.git"
+    },
+    "keywords": [
+        "yeoman-generator",
+        "server"  
+    ],
+    "files": [
+        "app",
+        "license",
+        "README.md",
+        "server.js"
+    ],
+    "author": "PYG",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/gick/game-servers/issues"
+    },
+    "homepage": "https://github.com/gick/game-servers#readme"
 }
