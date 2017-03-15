@@ -3,6 +3,10 @@ module.exports = function(app, gfs) {
     // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
     var MLG = require('../models/mlg.js')
+    var MCQ = require('../models/mcq.js')
+    var FreeText = require('../models/freetext.js')
+    var FreeText = require('../models/poi.js')
+    var StaticMedia = require('../models/staticmedia.js')
 
     app.get('/listAllFiles', function(req,
         res) {
@@ -13,7 +17,7 @@ module.exports = function(app, gfs) {
     });
 
     app.get('/mlg', function(req, res) {
-        Game.find({}, function(err, game) {
+        MLG.find({}, function(err, game) {
             console.log(err)
             res.send(game)
         })
@@ -21,10 +25,43 @@ module.exports = function(app, gfs) {
     //handle reception lgof a complete game
     app.post('/mlg', function(req, res) {
         var newMLG = new MLG();
-        var toSend={activityName:req.body.activityName}
+        var toSend = { activityName: req.body.activityName }
     })
 
 
+    app.get('/unitGame/:id', function(req, res) {
+        Game.find({ '_id': req.params.id, }, function(err, game) {
+            res.send(game);
+        })
+
+    })
+    app.get('/freetext/:id', function(req, res) {
+        FreeText.find({ '_id': req.params.id, }, function(err, game) {
+            res.send(game);
+        })
+
+    })
+    app.get('/poi/:id', function(req, res) {
+        Game.find({ '_id': req.params.id, }, function(err, game) {
+            res.send(game);
+        })
+
+    })
+
+
+    app.get('/mcq/:id', function(req, res) {
+        MCQ.find({ '_id': req.params.id, }, function(err, game) {
+            res.send(game);
+        })
+
+    })
+
+    app.get('/staticmedia/:id', function(req, res) {
+        StaticMedia.find({ '_id': req.params.id, }, function(err, staticMedia) {
+            res.send(staticMedia);
+        })
+
+    })
 
 
 
