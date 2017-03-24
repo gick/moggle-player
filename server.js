@@ -5,7 +5,8 @@ var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser   = require('body-parser');
 var busboyBodyParser = require('busboy-body-parser');
-
+var https = require('https')
+var fs=require('fs')
 var mongoose = require('mongoose');
 var Grid = require('gridfs-stream');
 
@@ -47,17 +48,10 @@ require('./app/route/staticRoutes.js')(app); // load satic routes
 require('./app/route/documentRoutes.js')(app,gfs); // load routes to services
 require('./app/route/fileRoutes.js',app,gfs)
 
-/////////////////////////////////////////////
-// Setup Servers
-
-// HTTPS
-/*
 var secureServer = https.createServer({
-    key: fs.readFileSync('/etc/letsencrypt/live/reveries-project.fr/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/reveries-project.fr/cert.pem')
+    key: fs.readFileSync('/etc/letsencrypt/live/games.reveries-project.fr/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/games.reveries-project.fr/cert.pem')
   }, app)
   .listen(HTTPS_PORT, function () {
     console.log('Secure Server listening on port ' + HTTPS_PORT);
 });
-*/
-app.listen(3000)

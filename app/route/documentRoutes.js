@@ -16,7 +16,7 @@ module.exports = function(app, gfs) {
         })
     });
 
-    app.get('/mlg', function(req, res) {
+    app.get('/listActivities', function(req, res) {
         MLG.find({}, function(err, game) {
             console.log(err)
             res.send(game)
