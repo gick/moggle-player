@@ -6,7 +6,7 @@ lib-cov
 *.out
 *.pid
 *.gz
-
+server.js
 
 pids
 logs
@@ -15,6 +15,5 @@ results
 npm-debug.log
 node_modules
 
-./server.js
 config/database.js
 config/auth.js
