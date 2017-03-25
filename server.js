@@ -26,7 +26,7 @@ var app = express();
     return next();
   };
   //res.redirect('https://localhost:'+HTTPS_PORT+req.url);
-   res.redirect('https://'+req.hostname+':'+HTTPS_PORT+req.url);
+   res.redirect('https://'+req.hostname+':'+HTTPS_PORT+req.url)
 });
 */
 // H
