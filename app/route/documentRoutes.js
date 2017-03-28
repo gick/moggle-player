@@ -5,7 +5,7 @@ module.exports = function(app, gfs) {
     var MLG = require('../models/mlg.js')
     var MCQ = require('../models/mcq.js')
     var FreeText = require('../models/freetext.js')
-    var FreeText = require('../models/poi.js')
+    var POI = require('../models/poi.js')
     var StaticMedia = require('../models/staticmedia.js')
 
     app.get('/listAllFiles', function(req,
@@ -42,8 +42,8 @@ module.exports = function(app, gfs) {
 
     })
     app.get('/poi/:id', function(req, res) {
-        Game.find({ '_id': req.params.id, }, function(err, game) {
-            res.send(game);
+        POI.find({ '_id': req.params.id, }, function(err, pois) {
+            res.send(pois);
         })
 
     })
@@ -57,6 +57,8 @@ module.exports = function(app, gfs) {
     })
 
     app.get('/staticmedia/:id', function(req, res) {
+        console.log(req.params.id)
+        console.log(req.params)
         StaticMedia.find({ '_id': req.params.id, }, function(err, staticMedia) {
             res.send(staticMedia);
         })

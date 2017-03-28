@@ -16,18 +16,14 @@ var gameSchema = mongoose.Schema({
     POIId: String,
     compass: Boolean,
     map: Boolean,
-    qrcodeId: String,
     passActivities: Boolean,
     activities: [],
     feedbackMediaId: String,
     poiScorePA: String,
     poiPA: String,
-    act1successScore: String,
-    act1successMed: String,
-    act2successScore: String,
-    act2successMed: String
+    
 });
 
-    // generating a hash
+// generating a hash
 
 module.exports = mongoose.model('Game', gameSchema);
