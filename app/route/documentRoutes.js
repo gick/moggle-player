@@ -48,6 +48,23 @@ module.exports = function(app, gfs) {
 
     })
 
+    app.get('/question/:id', function(req, res) {
+        FreeText.find({ '_id': req.params.id, }, function(err, game) {
+            if (game && game[0]) {
+                console.log("game " )
+                console.log(game)
+                res.send(game)
+            } else
+                MCQ.find({ '_id': req.params.id, }, function(err2, game2) {
+                    console.log("freetext")
+                    console.log(game2)
+                    res.send(game2);
+                })
+
+
+        })
+
+    })
 
     app.get('/mcq/:id', function(req, res) {
         MCQ.find({ '_id': req.params.id, }, function(err, game) {
