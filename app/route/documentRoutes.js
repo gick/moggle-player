@@ -25,7 +25,7 @@ module.exports = function(app, gfs) {
                 fs.close(fd, function() {
                     reduce = spawn('convert', ['-resize', '500x500', 'quality', '90', 'filetest.jpg', 'final.jpg']);
                     reduce.on('exit', function(code) {
-                        zbarimg('filetest.png', function(error, qrcode) {
+                        zbarimg('final.jpg', function(error, qrcode) {
                             console.log(error)
                             console.log(qrcode)
                             res.send(qrcode)
