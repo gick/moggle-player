@@ -8,7 +8,7 @@ module.exports = function(app, gfs) {
     var POI = require('../models/poi.js')
     var StaticMedia = require('../models/staticmedia.js')
     var zbarimg = require('zbarimg')
-
+    var spawn = require('child_process').spawn;
     var fs = require('fs');
 
     app.post('/qrscan', function(req, res) {
@@ -23,12 +23,15 @@ module.exports = function(app, gfs) {
             fs.write(fd, buffer, 0, buffer.length, null, function(err) {
                 if (err) throw 'error writing file: ' + err;
                 fs.close(fd, function() {
-
-                    zbarimg('filetest.jpg',function(error,qrcode){
-                        console.log(error)
-                        console.log(qrcode)
-                        res.send(qrcode)
+                    reduce = spawn('convert', ['-resize', '500x500', 'quality', '90', 'filetest.jpg', 'final.jpg']);
+                    reduce.on('exit', function(code) {
+                        zbarimg('filetest.png', function(error, qrcode) {
+                            console.log(error)
+                            console.log(qrcode)
+                            res.send(qrcode)
+                        });
                     });
+
                 })
             });
         });
@@ -80,7 +83,7 @@ module.exports = function(app, gfs) {
     app.get('/question/:id', function(req, res) {
         FreeText.find({ '_id': req.params.id, }, function(err, game) {
             if (game && game[0]) {
-                console.log("game " )
+                console.log("game ")
                 console.log(game)
                 res.send(game)
             } else
