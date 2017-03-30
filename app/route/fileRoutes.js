@@ -1,9 +1,35 @@
 module.exports = function(app, gfs) {
+    var zbarimg = require('zbarimg')
+
+    var fs = require('fs');
+
     app.get('/listAllFiles', function(req, res) {
         gfs.files.find({}).toArray(function(err, files) {
             res.send(files);
         })
     });
+
+    app.post('/qrscan', function(req, res) {
+        var path = 'filetest.png',
+            buffer = req.files.file.data;
+
+        fs.open(path, 'w', function(err, fd) {
+            if (err) {
+                throw 'error opening file: ' + err;
+            }
+
+            fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+                if (err) throw 'error writing file: ' + err;
+                fs.close(fd, function() {
+
+                    zbarimg('filetest.png',function(error,qrcode){
+                        res.send(qrcode)
+                    });
+                })
+            });
+        });
+
+    })
 
 
  app.get('/file/:id', function(req, res) {

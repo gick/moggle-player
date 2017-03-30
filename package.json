@@ -15,7 +15,8 @@
     "mongoose": "latest",
     "morgan": "^1.8.1",
     "vinyl": "^2.0.0",
-    "yeoman-generator": "^1.0.1"
+    "yeoman-generator": "^1.0.1",
+    "zbarimg": "^1.1.1"
   },
   "scripts": {
     "start": "node server.js"
