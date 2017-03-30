@@ -12,7 +12,7 @@ module.exports = function(app, gfs) {
     var fs = require('fs');
 
     app.post('/qrscan', function(req, res) {
-        var path = 'filetest.png',
+        var path = 'filetest.jpg',
             buffer = req.files.file.data;
 
         fs.open(path, 'w', function(err, fd) {
@@ -24,7 +24,9 @@ module.exports = function(app, gfs) {
                 if (err) throw 'error writing file: ' + err;
                 fs.close(fd, function() {
 
-                    zbarimg('filetest.png',function(error,qrcode){
+                    zbarimg('filetest.jpg',function(error,qrcode){
+                        console.log(error)
+                        console.log(qrcode)
                         res.send(qrcode)
                     });
                 })
