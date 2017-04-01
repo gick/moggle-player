@@ -21,6 +21,13 @@ var gameSchema = mongoose.Schema({
     poiScorePA: String,
     poiPAId: String,
     cluePOIId:String,
+    poiIncorrectMessage:String,
+    poiReachedMessage:String,
+    poiGuidFolia:Boolean,
+    poiGuidMap:Boolean,
+    poiGuidClue:Boolean,
+    poiGPSValidation:Boolean,
+    poiQRValidation:Boolean,
 
 });
 
