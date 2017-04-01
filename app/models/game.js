@@ -10,7 +10,6 @@ var mapinfoSchema = mongoose.Schema({
     zoomLevel:Number,
 })*/
 var gameSchema = mongoose.Schema({
-
     activityName: String,
     startMediaId: String,
     POIId: String,
@@ -20,8 +19,9 @@ var gameSchema = mongoose.Schema({
     activities: [],
     feedbackMediaId: String,
     poiScorePA: String,
-    poiPA: String,
-    
+    poiPAId: String,
+    cluePOIId:String,
+
 });
 
 // generating a hash
