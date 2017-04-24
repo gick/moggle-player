@@ -1,4 +1,4 @@
-module.exports = function(app, gfs) {
+module.exports = function(app, gfs,passport) {
 
     // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
@@ -10,6 +10,21 @@ module.exports = function(app, gfs) {
     var zbarimg = require('zbarimg')
     var spawn = require('child_process').spawn;
     var fs = require('fs');
+    app.get('/profile', function(req, res) {
+        if (req.isAuthenticated()) {
+            res.json({ success: true, user: req.user })
+        } else {
+            res.json({ success: false })
+        }
+    });
+
+    app.post('/login', passport.authenticate('local-login', {
+        successRedirect: '/profile', // if authentification succeeds, /profile will return user info
+        failureRedirect: '/profile', // if authentification fails, /profile will return {success:false}
+        failureFlash: true // allow flash messages
+    }));
+
+
 
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.jpg',
