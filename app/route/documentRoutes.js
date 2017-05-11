@@ -34,7 +34,7 @@ module.exports = function(app, gfs,passport) {
             return;
         }
 
-	for (int i = 0; i < scores.lenght: i++) {
+	for (var i = 0; i < user.scores.length; i++) {
 		if (user.scores[i].id == req.body.id) {
 			toUpdate.scores[i].score = req.body.score;
 			toUpdate.save(function(err) {
