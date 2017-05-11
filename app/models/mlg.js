@@ -13,6 +13,7 @@ var mlg = mongoose.Schema({
 
     label: String,
     staticMedia : String,
+    score: Boolean,
     unitGames:[]
 });
 

@@ -2,6 +2,7 @@ module.exports = function(app, gfs,passport) {
 
     // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
+    var User = require('../models/user.js')
     var MLG = require('../models/mlg.js')
     var MCQ = require('../models/mcq.js')
     var FreeText = require('../models/freetext.js')
@@ -24,7 +25,38 @@ module.exports = function(app, gfs,passport) {
         failureFlash: true // allow flash messages
     }));
 
+    app.post('/user', function(req, res) {
+	if (!req.isAuthenticated()) {
+            res.send({
+                success: false,
+                message: "Please authenticate"
+            });
+            return;
+        }
 
+	for (var i = 0; i < user.scores.length; i++) {
+		if (user.scores[i].id == req.body.id) {
+			toUpdate.scores[i].score = req.body.score;
+			toUpdate.save(function(err) {
+                        if (err) {
+                            console.log(err)
+                            res.send({ success: false })
+                        } else res.send({ success: true })
+
+                	})
+		} else {
+		toUpdate.scores.push({id:req.body.id, score:req.body.score});
+		toUpdate.save(function(err) {
+                        if (err) {
+                            console.log(err)
+                            res.send({ success: false })
+                        } else res.send({ success: true })
+
+        		})
+		}
+	}
+	
+    });
 
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.jpg',
@@ -52,8 +84,6 @@ module.exports = function(app, gfs,passport) {
         });
 
     })
-
-
 
     app.get('/listAllFiles', function(req,
         res) {
