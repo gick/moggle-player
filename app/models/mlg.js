@@ -12,11 +12,14 @@ var mapinfoSchema = mongoose.Schema({
 var mlg = mongoose.Schema({
 
     label: String,
-    staticMedia : String,
+    staticMedia: String,
     score: Boolean,
-    unitGames:[]
+    unitGames: [],
+    gameDifficulty: String,
+    gameDuration: String,
+    gameProximity: String,
+
 });
 
 module.exports = mongoose.model('MLG', mlg);
-    // generating a hash
-
+// generating a hash

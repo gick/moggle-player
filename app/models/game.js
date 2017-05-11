@@ -28,6 +28,7 @@ var gameSchema = mongoose.Schema({
     poiGuidClue:Boolean,
     poiGPSValidation:Boolean,
     poiQRValidation:Boolean,
+    poiReachedInventory:String,
 
 });
 
