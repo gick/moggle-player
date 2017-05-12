@@ -25,6 +25,11 @@ module.exports = function(app, gfs,passport) {
         failureFlash: true // allow flash messages
     }));
 
+    app.get('/logout', function(req, res) {
+        req.logout();
+        res.redirect('/');
+    });
+
     app.post('/user', function(req, res) {
 	if (!req.isAuthenticated()) {
             res.send({
