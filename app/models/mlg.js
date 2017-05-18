@@ -15,6 +15,7 @@ var mlg = mongoose.Schema({
     staticMedia: String,
     score: Boolean,
     unitGames: [],
+    badgeId: String,
     gameDifficulty: String,
     gameDuration: String,
     gameProximity: String,
