@@ -6,6 +6,7 @@ module.exports = function(app, gfs,passport) {
     var MLG = require('../models/mlg.js')
     var MCQ = require('../models/mcq.js')
     var InventoryItem=require('../models/inventoryItem.js')
+    var Badge = require('../models/badge.js')
     var FreeText = require('../models/freetext.js')
     var POI = require('../models/poi.js')
     var StaticMedia = require('../models/staticmedia.js')
@@ -121,6 +122,13 @@ module.exports = function(app, gfs,passport) {
     app.get('/inventory/:id', function(req, res) {
         InventoryItem.find({ '_id': req.params.id, }, function(err, inventoryItem) {
             res.send(inventoryItem);
+        })
+
+    })
+
+    app.get('/badge/:id', function(req, res) {
+        Badge.find({ '_id': req.params.id, }, function(err, badge) {
+            res.send(badge);
         })
 
     })
