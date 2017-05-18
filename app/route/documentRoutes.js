@@ -5,6 +5,7 @@ module.exports = function(app, gfs,passport) {
     var User = require('../models/user.js')
     var MLG = require('../models/mlg.js')
     var MCQ = require('../models/mcq.js')
+    var InventoryItem=require('../models/inventoryItem.js')
     var FreeText = require('../models/freetext.js')
     var POI = require('../models/poi.js')
     var StaticMedia = require('../models/staticmedia.js')
@@ -117,6 +118,13 @@ module.exports = function(app, gfs,passport) {
         })
 
     })
+    app.get('/inventory/:id', function(req, res) {
+        InventoryItem.find({ '_id': req.params.id, }, function(err, inventoryItem) {
+            res.send(inventoryItem);
+        })
+
+    })
+
     app.get('/freetext/:id', function(req, res) {
         FreeText.find({ '_id': req.params.id, }, function(err, game) {
             res.send(game);
