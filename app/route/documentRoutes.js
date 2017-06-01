@@ -64,6 +64,28 @@ module.exports = function(app, gfs,passport) {
 	}
 	
     });
+    app.post('/userfile', function(req, res) {
+            var part = req.files;
+            var writestream = gfs.createWriteStream({
+                filename: part.file.name,
+                mode: 'w',
+                content_type: part.file.mimetype,
+                metadata: {
+                }
+            });
+            writestream.write(part.file.data);
+
+            writestream.on('close', function(fileInfo) {
+                res.send({
+                    _id:fileInfo._id,
+                    success: true,
+
+                });
+
+            })
+            writestream.end();
+
+    });
 
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.jpg',

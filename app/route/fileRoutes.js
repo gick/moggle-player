@@ -8,7 +8,7 @@ module.exports = function(app, gfs) {
             res.send(files);
         })
     });
-
+    // handle media posted by authenticated users
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.png',
             buffer = req.files.file.data;
