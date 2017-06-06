@@ -87,6 +87,59 @@ module.exports = function(app, gfs,passport) {
 
     });
 
+    app.post('/user/badges', function(req, res) {
+		if (!req.isAuthenticated()) {
+            res.send({
+                success: false,
+                message: "Please authenticate"
+            });
+            return;
+        }
+		User.findById(req.user._id, function(err, toUpdate) {
+			console.log("User found, request id : " + req.body.id);
+			if (!toUpdate) {
+                    console.log("Err, user with id " + req.user._id + " does not exists")
+               }
+			var i=0;
+			while ((toUpdate.badges[i] != req.body.id) && (i < toUpdate.badges.length)) {
+				i++;
+			}
+            if (toUpdate.badges[i] == req.body.id) {
+				res.send({success: false, message: "Badge already acquired"});
+			} else {
+				console.log("Adding badge " + req.body.id)
+				i += 1;
+				toUpdate.badges.push(req.body.id);
+				toUpdate.save(function(err) {
+            		if (err) {
+                		console.log(err)
+                		return 500;
+            		}
+            		res.send({success: true, message: "badge added"})
+        		});
+			}
+        })
+    });
+
+    app.get('/user/badges', function(req, res) {
+		if (!req.isAuthenticated()) {
+            res.send({
+                success: false,
+                message: "Please authenticate"
+            });
+            return;
+        } else {
+			User.findById(req.user._id, function(err, user) {
+				var badgeArray=[]
+				for(var i=1;i<user.badges.length;i++){
+					var badgeTemp={id:user.badges[i]}
+					badgeArray.push(badgeTemp)
+				}
+				res.send(badgeArray)
+        	})
+		}
+    });
+
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.jpg',
             buffer = req.files.file.data;
