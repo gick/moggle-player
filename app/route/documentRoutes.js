@@ -1,11 +1,11 @@
-module.exports = function(app, gfs,passport) {
+module.exports = function(app, gfs, passport) {
 
     // Route for serving dynamic content (documents stored in mongodb)
     var Game = require('../models/game.js')
     var User = require('../models/user.js')
     var MLG = require('../models/mlg.js')
     var MCQ = require('../models/mcq.js')
-    var InventoryItem=require('../models/inventoryItem.js')
+    var InventoryItem = require('../models/inventoryItem.js')
     var Badge = require('../models/badge.js')
     var FreeText = require('../models/freetext.js')
     var POI = require('../models/poi.js')
@@ -33,7 +33,7 @@ module.exports = function(app, gfs,passport) {
     });
 
     app.post('/user', function(req, res) {
-	if (!req.isAuthenticated()) {
+        if (!req.isAuthenticated()) {
             res.send({
                 success: false,
                 message: "Please authenticate"
@@ -41,103 +41,102 @@ module.exports = function(app, gfs,passport) {
             return;
         }
 
-	for (var i = 0; i < user.scores.length; i++) {
-		if (user.scores[i].id == req.body.id) {
-			toUpdate.scores[i].score = req.body.score;
-			toUpdate.save(function(err) {
-                        if (err) {
-                            console.log(err)
-                            res.send({ success: false })
-                        } else res.send({ success: true })
+        for (var i = 0; i < user.scores.length; i++) {
+            if (user.scores[i].id == req.body.id) {
+                toUpdate.scores[i].score = req.body.score;
+                toUpdate.save(function(err) {
+                    if (err) {
+                        console.log(err)
+                        res.send({ success: false })
+                    } else res.send({ success: true })
 
-                	})
-		} else {
-		toUpdate.scores.push({id:req.body.id, score:req.body.score});
-		toUpdate.save(function(err) {
-                        if (err) {
-                            console.log(err)
-                            res.send({ success: false })
-                        } else res.send({ success: true })
+                })
+            } else {
+                toUpdate.scores.push({ id: req.body.id, score: req.body.score });
+                toUpdate.save(function(err) {
+                    if (err) {
+                        console.log(err)
+                        res.send({ success: false })
+                    } else res.send({ success: true })
 
-        		})
-		}
-	}
-	
+                })
+            }
+        }
+
     });
     app.post('/userfile', function(req, res) {
-            var part = req.files;
-            var writestream = gfs.createWriteStream({
-                filename: part.file.name,
-                mode: 'w',
-                content_type: part.file.mimetype,
-                metadata: {
-                }
+        var part = req.files;
+        var writestream = gfs.createWriteStream({
+            filename: part.file.name,
+            mode: 'w',
+            content_type: part.file.mimetype,
+            metadata: {}
+        });
+        writestream.write(part.file.data);
+
+        writestream.on('close', function(fileInfo) {
+            res.send({
+                _id: fileInfo._id,
+                success: true,
+
             });
-            writestream.write(part.file.data);
 
-            writestream.on('close', function(fileInfo) {
-                res.send({
-                    _id:fileInfo._id,
-                    success: true,
-
-                });
-
-            })
-            writestream.end();
+        })
+        writestream.end();
 
     });
 
     app.post('/user/badges', function(req, res) {
-		if (!req.isAuthenticated()) {
+        if (!req.isAuthenticated()) {
             res.send({
                 success: false,
                 message: "Please authenticate"
             });
             return;
         }
-		User.findById(req.user._id, function(err, toUpdate) {
-			console.log("User found, request id : " + req.body.id);
-			if (!toUpdate) {
-                    console.log("Err, user with id " + req.user._id + " does not exists")
-               }
-			var i=0;
-			while ((toUpdate.badges[i] != req.body.id) && (i < toUpdate.badges.length)) {
-				i++;
-			}
+        User.findById(req.user._id, function(err, toUpdate) {
+            console.log("User found, request id : " + req.body.id);
+            if (!toUpdate) {
+                console.log("Err, user with id " + req.user._id + " does not exists")
+            }
+            var i = 0;
+            while ((toUpdate.badges[i] != req.body.id) && (i < toUpdate.badges.length)) {
+                i++;
+            }
             if (toUpdate.badges[i] == req.body.id) {
-				res.send({success: false, message: "Badge already acquired"});
-			} else {
-				console.log("Adding badge " + req.body.id)
-				i += 1;
-				toUpdate.badges.push(req.body.id);
-				toUpdate.save(function(err) {
-            		if (err) {
-                		console.log(err)
-                		return 500;
-            		}
-            		res.send({success: true, message: "badge added"})
-        		});
-			}
+                res.send({ success: false, message: "Badge already acquired" });
+            } else {
+                console.log("Adding badge " + req.body.id)
+                i += 1;
+                toUpdate.badges.push(req.body.id);
+                toUpdate.save(function(err) {
+                    if (err) {
+                        console.log(err)
+                        return 500;
+                    }
+                    res.send({ success: true, message: "badge added" })
+                });
+            }
         })
     });
 
     app.get('/user/badges', function(req, res) {
-		if (!req.isAuthenticated()) {
+        if (!req.isAuthenticated()) {
             res.send({
                 success: false,
                 message: "Please authenticate"
             });
             return;
         } else {
-			User.findById(req.user._id, function(err, user) {
-				var badgeArray=[]
-				for(var i=1;i<user.badges.length;i++){
-					var badgeTemp={id:user.badges[i]}
-					badgeArray.push(badgeTemp)
-				}
-				res.send(badgeArray)
-        	})
-		}
+            User.findById(req.user._id, function(err, user) {
+                var badgeArray = []
+                for (var i = 1; i < user.badges.length; i++) {
+                    var badgeTemp = { id: user.badges[i] }
+                    badgeArray.push(badgeTemp)
+                }
+                res.send(badgeArray)
+            })
+        }
     });
 
     app.post('/qrscan', function(req, res) {
@@ -176,10 +175,11 @@ module.exports = function(app, gfs,passport) {
     });
 
     app.get('/listActivities', function(req, res) {
-        MLG.find({}, function(err, game) {
-            console.log(err)
-            res.send(game)
-        })
+        MLG.find({})
+            .deepPopulate(['unitGames', 'badge','startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media','unitGames.inventoryItem','unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc','unitGames.POI'])
+            .exec(function(err, mlgs) {
+                res.send(mlgs)
+            })
     });
     //handle reception lgof a complete game
     app.post('/mlg', function(req, res) {
@@ -188,17 +188,26 @@ module.exports = function(app, gfs,passport) {
     })
 
 
-    app.get('/unitGame/:id', function(req, res) {
-        Game.find({ '_id': req.params.id, }, function(err, game) {
-            res.send(game);
-        })
+    app.get('/unitgame/:id', function(req, res) {
+        Game.find({ '_id': req.params.id, })
+            .populate('startMedia')
+            .populate('feedbackMedia')
+            .populate('POI')
+            .populate('inventoryItem')
+            .exec(function(err, game) {
+                res.send(game);
+            })
+
 
     })
-    app.get('/inventory/:id', function(req, res) {
-        InventoryItem.find({ '_id': req.params.id, }, function(err, inventoryItem) {
-            res.send(inventoryItem);
-        })
 
+    app.get('/inventory/:id', function(req, res) {
+        InventoryItem.find({ '_id': req.params.id, })
+            .populate('media')
+            .populate('inventoryDoc')
+            .exec(function(err, results) {
+                res.send(results)
+            })
     })
 
     app.get('/badge/:id', function(req, res) {
