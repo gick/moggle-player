@@ -176,7 +176,7 @@ module.exports = function(app, gfs, passport) {
 
     app.get('/listActivities', function(req, res) {
         MLG.find({})
-            .deepPopulate(['unitGames', 'badge','startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media','unitGames.inventoryItem','unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc','unitGames.POI'])
+            .deepPopulate(['unitGames', 'badge','badge.media','startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media','unitGames.inventoryItem','unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc','unitGames.POI'])
             .exec(function(err, mlgs) {
                 res.send(mlgs)
             })
