@@ -9,6 +9,7 @@ module.exports = function(app, gfs) {
         })
     });
     // handle media posted by authenticated users
+    /*
     app.post('/qrscan', function(req, res) {
         var path = 'filetest.png',
             buffer = req.files.file.data;
@@ -31,7 +32,7 @@ module.exports = function(app, gfs) {
         });
 
     })
-
+*/
 
  app.get('/file/:id', function(req, res) {
                     console.log(req)
