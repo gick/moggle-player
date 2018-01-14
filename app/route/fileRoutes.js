@@ -23,6 +23,7 @@ module.exports = function(app, gfs) {
                 fs.close(fd, function() {
 
                     zbarimg('filetest.png',function(error,qrcode){
+                        console.log(error)
                         res.send(qrcode)
                     });
                 })
