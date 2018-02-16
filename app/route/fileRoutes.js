@@ -35,7 +35,6 @@ module.exports = function(app, gfs) {
 */
 
  app.get('/file/:id', function(req, res) {
-                    console.log(req)
         if (req.headers.range) {
             gfs.findOne({
                 _id: req.params.id
