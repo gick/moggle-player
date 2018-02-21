@@ -92,6 +92,7 @@ module.exports = function(app, gfs) {
             if (err) {
               return res.send(err)
             }
+
             res.sse.data(event);
             res.send()
           })
@@ -104,7 +105,7 @@ module.exports = function(app, gfs) {
         _id: req.params.id
       })
       .exec(function(err, foliaInstance) {
-        let id = foliaInstance.coloriage + foliaInstance.leaf
+        let id =foliaInstance.coloriage+foliaInstance.leaf
 
         request('http://localhost:8081/stringResult/' + id,(err,response,body)=>{
           foliaInstance.result=body
@@ -114,7 +115,7 @@ module.exports = function(app, gfs) {
   })
 
 var populateMask=function(res,foliaInstance){
-        let id = foliaInstance.coloriage + foliaInstance.leaf
+        let id = foliaInstance.coloriage+foliaInstance.leaf
 
         let maskWriteStream = gfs.createWriteStream({
           filename: foliaInstance.id + '.png',
@@ -136,35 +137,6 @@ var populateMask=function(res,foliaInstance){
 
   }
 
-
-
-
-  app.get('/populateMask/:id', function(req, res) {
-    FoliaExec.findOne({
-        _id: req.params.id
-      })
-      .exec(function(err, foliaInstance) {
-        let id = foliaInstance.coloriage + foliaInstance.leaf
-        console.log(id)
-        let maskWriteStream = gfs.createWriteStream({
-          filename: id + '.png',
-          contentType: 'image/png'
-        })
-
-        maskWriteStream.on('close', (file) => {
-
-          foliaInstance.maskFileId = file._id
-          foliaInstance.save(function(err){
-            if(err){
-              res.status(500).send(err)
-            }
-            res.send({success:true,resource:foliaInstance})
-          })
-
-        })
-        request('http://localhost:8081/mask/' + id).pipe(maskWriteStream)
-
-  })})
 
 
 }
