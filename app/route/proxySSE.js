@@ -8,6 +8,7 @@ module.exports =  function(app){
   var es = function(url){
       var source=new EventSource(url)
       source.on('error',function(){
+        console.log('problem')
         source.close()
       })
 

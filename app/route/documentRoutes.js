@@ -1,6 +1,7 @@
 module.exports = function(app, gfs, passport) {
 
   // Route for serving dynamic content (documents stored in mongodb)
+  var base64Img = require('base64-img');
   var request = require('request')
   var Game = require('../models/game.js')
   var User = require('../models/user.js')
@@ -27,7 +28,13 @@ module.exports = function(app, gfs, passport) {
       })
     }
   });
-
+  app.get('/foliaInstance/:id',function(req,res){
+    FoliaExec.findOne({_id:req.params.id})
+      .exec(function(err,foliaInstance){
+        if(err){res.status(400).send('Instance not found')}
+        res.status(200).send(foliaInstance)
+      })
+  })
   app.post('/login', passport.authenticate('local-login', {
     successRedirect: '/profile', // if authentification succeeds, /profile will return user info
     failureRedirect: '/profile', // if authentification fails, /profile will return {success:false}
@@ -86,7 +93,6 @@ module.exports = function(app, gfs, passport) {
   app.post('/leaf', function(req, res) {
     var part = req.files;
     var writestream = gfs.createWriteStream({
-      filename: part.file.name,
       mode: 'w',
       content_type: part.file.mimetype,
       metadata: {}
@@ -96,7 +102,7 @@ module.exports = function(app, gfs, passport) {
     writestream.on('close', function(fileInfo) {
       var foliaExec = new FoliaExec()
       foliaExec.leaf = fileInfo._id
-      foliaExec.leafFilename = fileInfo.filename
+      foliaExec.leafFilename = fileInfo._id
       foliaExec.leafContentType = fileInfo.contentType
       foliaExec.leafLength = fileInfo.length
       foliaExec.save(function(err) {
@@ -106,7 +112,7 @@ module.exports = function(app, gfs, passport) {
           })
         } else res.send({
           success: true,
-          leaf: fileInfo._id,
+          resource: foliaExec,
           operation: 'create'
         })
       })
@@ -116,27 +122,30 @@ module.exports = function(app, gfs, passport) {
 
   });
 
-  app.post('/coloriage', function(req, res) {
-    var part = req.files;
-    if (!req.body.leafId) {
+  app.post('/coloriage/:id', function(req, res) {
+    if (!req.params.id) {
       res.send({
         success: false,
         operation: 'create',
-        message: 'No leaf id provided'
+        message: 'No folia id provided'
       })
     }
+    var filepath = base64Img.imgSync(req.body.dataURI, '/tmp', req.params.id +Date.now());
+
     var writestream = gfs.createWriteStream({
-      filename: part.file.name,
-      mode: 'w',
-      content_type: part.file.mimetype,
-      metadata: {}
-    });
-    writestream.write(part.file.data);
+    mode: 'w', // default value: w
+
+    //any other options from the GridStore may be passed too, e.g.:
+
+    content_type: 'image/png', // For content_type to work properly, set "mode"-option to "w" too!
+
+});
+
+    fs.createReadStream(filepath).pipe(writestream)
+
 
     writestream.on('close', function(fileInfo) {
-      FoliaExec.findOne({
-          'leaf': req.body.leafId
-        })
+      FoliaExec.findById(req.params.id)
         .exec(function(err, result) {
           if (err) {
             res.send({
@@ -144,7 +153,7 @@ module.exports = function(app, gfs, passport) {
             })
           } else {
             result.coloriage = fileInfo._id
-            result.coloriageFilename = fileInfo.filename
+            result.coloriageFilename = fileInfo._id
             result.coloriageContentType = fileInfo.contentType
             result.coloriageLength = fileInfo.length
             result.save(function(err) {
@@ -161,8 +170,9 @@ module.exports = function(app, gfs, passport) {
           }
 
         })
+        writestream.end();
+
     })
-    writestream.end();
 
   });
 

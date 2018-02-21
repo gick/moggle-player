@@ -3,6 +3,8 @@ var Schema = mongoose.Schema;
 
 var foliaExecSchema = mongoose.Schema({
     stdout:Array,
+    resultFileId:String,
+    maskFileId:String,
     label: String,
     owner: String,
     status: String,
