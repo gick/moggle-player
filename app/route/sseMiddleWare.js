@@ -78,7 +78,7 @@ module.exports = function(app, gfs) {
           //=> Data messages (no event name, but defaults to 'message' in the browser).
           foliaInstance.stdout.push(event)
 
-          res.sse.data(event.data);
+          res.sse.data(event);
           //=> Named event + data (data is mandatory)
           //=> Comment, not interpreted by EventSource on the browser - useful for debugging/self-documenting purposes.
           //=> In data() and event() you can also pass an ID - useful for replay with Last-Event-ID header.
@@ -87,42 +87,56 @@ module.exports = function(app, gfs) {
         // (not recommended) to force the end of the connection, you can still use res.end()
         // beware that the specification does not support server-side close, so this will result in an error in EventSource.
         // prefer sending a normal event that asks the client to call EventSource#close() itself to gracefully terminate.
-        proxySSE.emitter.on('procterm', () => {
+        proxySSE.emitter.on('procterm', (event) => {
           foliaInstance.save(function(err) {
             if (err) {
               return res.send(err)
             }
-            res.sse.data('End of calculation');
+            res.sse.data(event);
             res.send()
           })
         })
 
       });
   });
-
   app.get('/populateResult/:id', function(req, res) {
     FoliaExec.findOne({
         _id: req.params.id
       })
       .exec(function(err, foliaInstance) {
         let id = foliaInstance.coloriage + foliaInstance.leaf
-        let resultWriteStream = gfs.createWriteStream({
-          filename: id + '.csv',
-          content_type: 'plain/text'
+
+        request('http://localhost:8081/stringResult/' + id,(err,response,body)=>{
+          foliaInstance.result=body
+          populateMask(res,foliaInstance)
+        })
+      })
+  })
+
+var populateMask=function(res,foliaInstance){
+        let id = foliaInstance.coloriage + foliaInstance.leaf
+
+        let maskWriteStream = gfs.createWriteStream({
+          filename: foliaInstance.id + '.png',
+          contentType: 'image/png'
         })
 
-        resultWriteStream.on('close', (file) => {
-          foliaInstance.resultFileId = file._id
+        maskWriteStream.on('close', (file) => {
+
+          foliaInstance.maskFileId = file._id
           foliaInstance.save(function(err){
             if(err){
-              res.status(500).send(err)
+             return  res.send(err)
             }
             res.send({success:true,resource:foliaInstance})
           })
+
         })
-        request('http://localhost:8081/result/' + id).pipe(resultWriteStream)
-      })
-  })
+        request('http://localhost:8081/mask/' + id).pipe(maskWriteStream)
+
+  }
+
+
 
 
   app.get('/populateMask/:id', function(req, res) {
