@@ -13,7 +13,6 @@ var mapinfoSchema = mongoose.Schema({
 var gameSchema = mongoose.Schema({
 
     label: String,
-    inventoryPage: String,
     startMedia: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
     POI: { type: Schema.Types.ObjectId, ref: 'POI' },
     passActivities: Boolean,
@@ -22,10 +21,7 @@ var gameSchema = mongoose.Schema({
     status: String,
     freetextActivities: [{ type: Schema.Types.ObjectId, ref: 'FreeText' }],
     mcqActivities: [{ type: Schema.Types.ObjectId, ref: 'MCQ' }],
-    activityOrder: [String],
     feedbackMedia: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
-    poiScorePA: String,
-    poiPAId: String,
     status: { type: String, default: 'Private' },
     clueGuidance: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
     typeLabel: { type: String, default: 'Unit game' },
@@ -38,12 +34,6 @@ var gameSchema = mongoose.Schema({
     poiIncorrectMessage: String,
     poiReachedMessage: String,
     inventoryItem: { type: Schema.Types.ObjectId, ref: 'InventoryItem' },
-    activity1Success: String,
-    activity1Fail: String,
-    activity2Success: String,
-    activity2Fail: String,
-    activity3Success: String,
-    activity3Fail: String,
     type: { type: String, default: 'unitgame' },
 
 });

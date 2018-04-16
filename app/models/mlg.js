@@ -15,9 +15,8 @@ var mapinfoSchema = mongoose.Schema({
 var mlg = mongoose.Schema({
 
     label: String,
-    isCompetition: Boolean,
-    playerNbr: Number,
     startpage:  { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
+    endPage:  { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
     unitGames: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
     type: { type: String, default: 'mlg' },
     typeLabel: { type: String, default: 'Mobile learning game' },
@@ -25,9 +24,9 @@ var mlg = mongoose.Schema({
     readonly: String,
     status: { type: String, default: 'Public' },
     badge: { type: Schema.Types.ObjectId, ref: 'Badge' },
-    gameDifficulty: String,
-    gameDuration: String,
-    gameProximity: String,
+    difficulty: Number,
+    duration: String,
+    description: String,
 });
 mlg.plugin(deepPopulate,{})
 
