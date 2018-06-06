@@ -1,4 +1,4 @@
-module.exports = function(app, gfs, passport) {
+module.exports = function (app, gfs, passport) {
 
   // Route for serving dynamic content (documents stored in mongodb)
   var base64Img = require('base64-img');
@@ -16,7 +16,7 @@ module.exports = function(app, gfs, passport) {
   var zbarimg = require('zbarimg')
   var spawn = require('child_process').spawn;
   var fs = require('fs');
-  app.get('/profile', function(req, res) {
+  app.get('/profile', function (req, res) {
     if (req.isAuthenticated()) {
       res.json({
         success: true,
@@ -28,10 +28,10 @@ module.exports = function(app, gfs, passport) {
       })
     }
   });
-  app.get('/foliaInstance/:id',function(req,res){
-    FoliaExec.findOne({_id:req.params.id})
-      .exec(function(err,foliaInstance){
-        if(err){res.status(400).send('Instance not found')}
+  app.get('/foliaInstance/:id', function (req, res) {
+    FoliaExec.findOne({ _id: req.params.id })
+      .exec(function (err, foliaInstance) {
+        if (err) { res.status(400).send('Instance not found') }
         res.status(200).send(foliaInstance)
       })
   })
@@ -41,12 +41,12 @@ module.exports = function(app, gfs, passport) {
     failureFlash: true // allow flash messages
   }));
 
-  app.get('/logout', function(req, res) {
+  app.get('/logout', function (req, res) {
     req.logout();
     res.redirect('/');
   });
 
-  app.post('/user', function(req, res) {
+  app.post('/user', function (req, res) {
     if (!req.isAuthenticated()) {
       res.send({
         success: false,
@@ -58,7 +58,7 @@ module.exports = function(app, gfs, passport) {
     for (var i = 0; i < user.scores.length; i++) {
       if (user.scores[i].id == req.body.id) {
         toUpdate.scores[i].score = req.body.score;
-        toUpdate.save(function(err) {
+        toUpdate.save(function (err) {
           if (err) {
             console.log(err)
             res.send({
@@ -74,7 +74,7 @@ module.exports = function(app, gfs, passport) {
           id: req.body.id,
           score: req.body.score
         });
-        toUpdate.save(function(err) {
+        toUpdate.save(function (err) {
           if (err) {
             console.log(err)
             res.send({
@@ -90,7 +90,9 @@ module.exports = function(app, gfs, passport) {
 
   });
 
-  app.post('/leaf', function(req, res) {
+//Posting leaf create a foliaExec instance that will be populated
+// during Folia execution 
+  app.post('/leaf', function (req, res) {
     var part = req.files;
     var writestream = gfs.createWriteStream({
       mode: 'w',
@@ -99,13 +101,14 @@ module.exports = function(app, gfs, passport) {
     });
     writestream.write(part.file.data);
 
-    writestream.on('close', function(fileInfo) {
+    writestream.on('close', function (fileInfo) {
       var foliaExec = new FoliaExec()
-      foliaExec.leaf = fileInfo._id
+      foliaExec.leafId = fileInfo._id
+      foliaExec.playerID = req.body.userId
       foliaExec.leafFilename = fileInfo._id
       foliaExec.leafContentType = fileInfo.contentType
       foliaExec.leafLength = fileInfo.length
-      foliaExec.save(function(err) {
+      foliaExec.save(function (err) {
         if (err) {
           res.send({
             success: false
@@ -122,7 +125,7 @@ module.exports = function(app, gfs, passport) {
 
   });
 
-  app.post('/coloriage/:id', function(req, res) {
+  app.post('/coloriage/:id', function (req, res) {
     if (!req.params.id) {
       res.send({
         success: false,
@@ -130,56 +133,31 @@ module.exports = function(app, gfs, passport) {
         message: 'No folia id provided'
       })
     }
-    var filepath = base64Img.imgSync(req.body.dataURI, '/tmp', req.params.id +Date.now());
 
-    var writestream = gfs.createWriteStream({
-    mode: 'w', // default value: w
+    FoliaExec.findById(req.params.id)
+      .exec(function (err, result) {
+        if (err) {
+          res.send({
+            success: false
+          })
+        } else {
+          result.coloriageFileBase64 = req.body.dataURI
+          result.colorFilename=result.leafFilename+'_color.png'
+          result.save()
+          res.send({
+            success: true,
+            resource: result,
+            operation: 'update'
+          })
+        }
 
-    //any other options from the GridStore may be passed too, e.g.:
-
-    content_type: 'image/png', // For content_type to work properly, set "mode"-option to "w" too!
-
-});
-
-    fs.createReadStream(filepath).pipe(writestream)
-
-
-    writestream.on('close', function(fileInfo) {
-      FoliaExec.findById(req.params.id)
-        .exec(function(err, result) {
-          if (err) {
-            res.send({
-              success: false
-            })
-          } else {
-            result.coloriage = fileInfo._id
-            result.coloriageFilename = fileInfo._id
-            result.coloriageContentType = fileInfo.contentType
-            result.coloriageLength = fileInfo.length
-            result.save(function(err) {
-              if (err) {
-                res.send({
-                  success: false
-                })
-              } else res.send({
-                success: true,
-                resource: result,
-                operation: 'update'
-              })
-            })
-          }
-
-        })
-        writestream.end();
-
-    })
-
+      })
   });
 
 
 
 
-  app.post('/userfile', function(req, res) {
+  app.post('/userfile', function (req, res) {
     var part = req.files;
     var writestream = gfs.createWriteStream({
       filename: part.file.name,
@@ -189,7 +167,7 @@ module.exports = function(app, gfs, passport) {
     });
     writestream.write(part.file.data);
 
-    writestream.on('close', function(fileInfo) {
+    writestream.on('close', function (fileInfo) {
       res.send({
         _id: fileInfo._id,
         success: true,
@@ -201,7 +179,7 @@ module.exports = function(app, gfs, passport) {
 
   });
 
-  app.post('/user/badges', function(req, res) {
+  app.post('/user/badges', function (req, res) {
     if (!req.isAuthenticated()) {
       res.send({
         success: false,
@@ -209,7 +187,7 @@ module.exports = function(app, gfs, passport) {
       });
       return;
     }
-    User.findById(req.user._id, function(err, toUpdate) {
+    User.findById(req.user._id, function (err, toUpdate) {
       console.log("User found, request id : " + req.body.id);
       if (!toUpdate) {
         console.log("Err, user with id " + req.user._id + " does not exists")
@@ -227,7 +205,7 @@ module.exports = function(app, gfs, passport) {
         console.log("Adding badge " + req.body.id)
         i += 1;
         toUpdate.badges.push(req.body.id);
-        toUpdate.save(function(err) {
+        toUpdate.save(function (err) {
           if (err) {
             console.log(err)
             return 500;
@@ -241,7 +219,7 @@ module.exports = function(app, gfs, passport) {
     })
   });
 
-  app.get('/user/badges', function(req, res) {
+  app.get('/user/badges', function (req, res) {
     if (!req.isAuthenticated()) {
       res.send({
         success: false,
@@ -249,7 +227,7 @@ module.exports = function(app, gfs, passport) {
       });
       return;
     } else {
-      User.findById(req.user._id, function(err, user) {
+      User.findById(req.user._id, function (err, user) {
         var badgeArray = []
         for (var i = 1; i < user.badges.length; i++) {
           var badgeTemp = {
@@ -262,21 +240,21 @@ module.exports = function(app, gfs, passport) {
     }
   });
 
-  app.post('/qrscan', function(req, res) {
+  app.post('/qrscan', function (req, res) {
     var path = 'filetest.jpg',
       buffer = req.files.file.data;
 
-    fs.open(path, 'w', function(err, fd) {
+    fs.open(path, 'w', function (err, fd) {
       if (err) {
         throw 'error opening file: ' + err;
       }
 
-      fs.write(fd, buffer, 0, buffer.length, null, function(err) {
+      fs.write(fd, buffer, 0, buffer.length, null, function (err) {
         if (err) throw 'error writing file: ' + err;
-        fs.close(fd, function() {
+        fs.close(fd, function () {
           reduce = spawn('convert', ['-resize', '500x500', 'quality', '90', 'filetest.jpg', 'final.jpg']);
-          reduce.on('exit', function(code) {
-            zbarimg('final.jpg', function(error, qrcode) {
+          reduce.on('exit', function (code) {
+            zbarimg('final.jpg', function (error, qrcode) {
               console.log(error)
               console.log(qrcode)
               res.send(qrcode)
@@ -289,23 +267,23 @@ module.exports = function(app, gfs, passport) {
 
   })
 
-  app.get('/listAllFiles', function(req,
+  app.get('/listAllFiles', function (req,
     res) {
     console.log(req)
-    gfs.files.find({}).toArray(function(err, files) {
+    gfs.files.find({}).toArray(function (err, files) {
       res.send(files);
     })
   });
 
-  app.get('/listActivities', function(req, res) {
+  app.get('/listActivities', function (req, res) {
     MLG.find({})
-      .deepPopulate(['unitGames', 'badge', 'badge.media', 'startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media', 'unitGames.inventoryItem', 'unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc', 'unitGames.POI'])
-      .exec(function(err, mlgs) {
+      .deepPopulate(['unitGames', 'badge', 'badge.media', 'startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.freetextActivities.media', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media', 'unitGames.inventoryItem', 'unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc', 'unitGames.POI'])
+      .exec(function (err, mlgs) {
         res.send(mlgs)
       })
   });
   //handle reception lgof a complete game
-  app.post('/mlg', function(req, res) {
+  app.post('/mlg', function (req, res) {
     var newMLG = new MLG();
     var toSend = {
       activityName: req.body.activityName
@@ -313,62 +291,62 @@ module.exports = function(app, gfs, passport) {
   })
 
 
-  app.get('/unitgame/:id', function(req, res) {
+  app.get('/unitgame/:id', function (req, res) {
     Game.find({
-        '_id': req.params.id,
-      })
+      '_id': req.params.id,
+    })
       .populate('startMedia')
       .populate('feedbackMedia')
       .populate('POI')
       .populate('inventoryItem')
-      .exec(function(err, game) {
+      .exec(function (err, game) {
         res.send(game);
       })
 
 
   })
 
-  app.get('/inventory/:id', function(req, res) {
+  app.get('/inventory/:id', function (req, res) {
     InventoryItem.find({
-        '_id': req.params.id,
-      })
+      '_id': req.params.id,
+    })
       .populate('media')
       .populate('inventoryDoc')
-      .exec(function(err, results) {
+      .exec(function (err, results) {
         res.send(results)
       })
   })
 
-  app.get('/badge/:id', function(req, res) {
+  app.get('/badge/:id', function (req, res) {
     Badge.find({
       '_id': req.params.id,
-    }, function(err, badge) {
+    }, function (err, badge) {leafFileName
       res.send(badge);
     })
 
   })
 
-  app.get('/freetext/:id', function(req, res) {
+  app.get('/freetext/:id', function (req, res) {
     FreeText.find({
       '_id': req.params.id,
-    }, function(err, game) {
+    }, function (err, game) {
       res.send(game);
     })
 
   })
-  app.get('/poi/:id', function(req, res) {
+  app.get('/poi/:id', function (req, res) {
     POI.find({
       '_id': req.params.id,
-    }, function(err, pois) {
+    }, function (err, pois) {
       res.send(pois);
     })
 
   })
 
-  app.get('/question/:id', function(req, res) {
+  app.get('/question/:id', function (req, res) {
     FreeText.find({
       '_id': req.params.id,
-    }, function(err, game) {
+    }, function (err, game) {
       if (game && game[0]) {
         console.log("game ")
         console.log(game)
@@ -376,7 +354,7 @@ module.exports = function(app, gfs, passport) {
       } else
         MCQ.find({
           '_id': req.params.id,
-        }, function(err2, game2) {
+        }, function (err2, game2) {
           console.log("freetext")
           console.log(game2)
           res.send(game2);
@@ -387,21 +365,21 @@ module.exports = function(app, gfs, passport) {
 
   })
 
-  app.get('/mcq/:id', function(req, res) {
+  app.get('/mcq/:id', function (req, res) {
     MCQ.find({
       '_id': req.params.id,
-    }, function(err, game) {
+    }, function (err, game) {
       res.send(game);
     })
 
   })
 
-  app.get('/staticmedia/:id', function(req, res) {
+  app.get('/staticmedia/:id', function (req, res) {
     console.log(req.params.id)
     console.log(req.params)
     StaticMedia.find({
       '_id': req.params.id,
-    }, function(err, staticMedia) {
+    }, function (err, staticMedia) {
       res.send(staticMedia);
     })
 
@@ -410,11 +388,11 @@ module.exports = function(app, gfs, passport) {
 
 
 
-  app.get('/file/:id', function(req, res) {
+  app.get('/file/:id', function (req, res) {
     if (req.headers.range) {
       gfs.findOne({
         _id: req.params.id
-      }, function(err, file) {
+      }, function (err, file) {
         if (!file) {
           res.send({
             success: false
@@ -444,10 +422,10 @@ module.exports = function(app, gfs, passport) {
           }
         });
 
-        req.on('error', function(err) {
+        req.on('error', function (err) {
           res.send(500, err);
         });
-        readstream.on('error', function(err) {
+        readstream.on('error', function (err) {
           res.send(500, err);
         });
         readstream.pipe(res);
@@ -458,7 +436,7 @@ module.exports = function(app, gfs, passport) {
 
       gfs.findOne({
         _id: req.params.id
-      }, function(err, file) {
+      }, function (err, file) {
         if (!file) {
           res.send({
             success: false
@@ -472,10 +450,10 @@ module.exports = function(app, gfs, passport) {
         res.set('Content-Type', file.contentType);
         res.set('Content-Length', file.length);
 
-        req.on('error', function(err) {
+        req.on('error', function (err) {
           res.send(500, err);
         });
-        readstream.on('error', function(err) {
+        readstream.on('error', function (err) {
           res.send(500, err);
         });
         readstream.pipe(res);

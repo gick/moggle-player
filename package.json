@@ -1,6 +1,8 @@
 {
   "name": "generator-rev-server",
-  "dependencies": {
+  "node-main": "localserver.js",
+  "main": "http://localhost:8080",
+    "dependencies": {
     "@toverux/expresse": "^2.4.0",
     "async": "^2.6.0",
     "base64-img": "^1.0.4",

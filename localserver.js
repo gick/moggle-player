@@ -30,6 +30,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(busboyBodyParser());
 //app.use(express.static(__dirname))
 
+
     // required for passport
 app.use(session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
 app.use(passport.initialize());
@@ -39,7 +40,7 @@ var gfs = new Grid(mongoose.connection.db);
 // routes ======================================================================
 require('./app/route/staticRoutes.js')(app); // load our routes and pass in our app and fully configured passport
 require('./app/route/fileRoutes.js')(app,gfs);
-require('./app/route/sseMiddleWare.js')(app,gfs)
+require('./app/route/sseMiddleWare.js')(app)
 require('./app/route/documentRoutes.js')(app,gfs,passport);
 
 //require('./app/route/imageAnalysisRoute.js')(app, gfs,passport);
