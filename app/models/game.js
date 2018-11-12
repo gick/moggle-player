@@ -13,27 +13,24 @@ var mapinfoSchema = mongoose.Schema({
 var gameSchema = mongoose.Schema({
 
     label: String,
+    feedbackMedia: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
     startMedia: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
+
     POI: { type: Schema.Types.ObjectId, ref: 'POI' },
-    passActivities: Boolean,
+    poiMapGuidance:{type : Boolean,default:false},
+    poiReachedMessage: String,
+
     readonly: String,
     owner: String,
-    status: String,
+    status: { type: String, default: 'Private' },
+    
+    identificationActivity:{type:Schema.Types.ObjectId,ref:'Folia'},
     freetextActivities: [{ type: Schema.Types.ObjectId, ref: 'FreeText' }],
     mcqActivities: [{ type: Schema.Types.ObjectId, ref: 'MCQ' }],
-    feedbackMedia: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
-    status: { type: String, default: 'Private' },
-    clueGuidance: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
-    typeLabel: { type: String, default: 'Unit game' },
-    poiGuidFolia: Boolean,
-    poiGuidMap: Boolean,
-    poiGuidType: String,
-    poiGuidClue: Boolean,
-    poiGPSValidation: Boolean,
-    poiQRValidation: Boolean,
-    poiIncorrectMessage: String,
-    poiReachedMessage: String,
+
     inventoryItem: { type: Schema.Types.ObjectId, ref: 'InventoryItem' },
+
+    typeLabel: { type: String, default: 'Unit game' },
     type: { type: String, default: 'unitgame' },
 
 });

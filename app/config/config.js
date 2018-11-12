@@ -1,2 +1,2 @@
-var webDirectory = '../rev-games/';
+var webDirectory = '../rev-games';
 module.exports = webDirectory

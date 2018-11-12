@@ -13,6 +13,8 @@ module.exports = function (app, gfs, passport) {
   var POI = require('../models/poi.js')
   var StaticMedia = require('../models/staticmedia.js')
   var FoliaExec = require('../models/foliaExec.js')
+  var Folia = require('../models/folia.js')
+
   var zbarimg = require('zbarimg')
   var spawn = require('child_process').spawn;
   var fs = require('fs');
@@ -218,6 +220,50 @@ module.exports = function (app, gfs, passport) {
       }
     })
   });
+  app.get('/foliaInstances', function (req, res) {
+   
+      FoliaExec.find({}, function (err, results) {
+        for(var i=0;i<results.length;i++){
+          var writestream=fs.createWriteStream('/home/gick/demoData/' + results[i].leafId + '.jpg')
+          var readstream=gfs.createReadStream({_id:results[i].leafId})
+          readstream.pipe(writestream)
+        }
+        res.send(results)
+      })
+    
+  });
+  app.get('/foliaInstancesColor', function (req, res) {
+   
+    FoliaExec.find({}, function (err, results) {
+      for(var i=0;i<results.length;i++){
+        if(results[i].coloriageFileBase64){
+        let coloriageBase64 = results[i].coloriageFileBase64.replace(
+          /^data:image\/png;base64,/,
+          ""
+        );
+    
+        fs.writeFile('/home/gick/demoData/' + results[i].leafId + '_coloriage.png',coloriageBase64,'base64')
+      }}
+      res.send(results)
+    })
+  
+});
+
+app.get('/foliaInstancesCSV', function (req, res) {
+   
+  FoliaExec.find({}, function (err, results) {
+    for(var i=0;i<results.length;i++){
+      if(results[i].resultCSV){
+      var filename=results[i].leafId +'result.csv'
+      var str=JSON.stringify(results[i].resultCSV)
+      fs.writeFile('/home/gick/demoData/' + filename,str)
+    }}
+    res.send(results)
+  })
+
+});
+
+
 
   app.get('/user/badges', function (req, res) {
     if (!req.isAuthenticated()) {
@@ -277,34 +323,13 @@ module.exports = function (app, gfs, passport) {
 
   app.get('/listActivities', function (req, res) {
     MLG.find({})
-      .deepPopulate(['unitGames', 'badge', 'badge.media', 'startpage', 'unitGames.startMedia', 'unitGames.feedbackMedia', 'unitGames.freetextActivities', 'unitGames.freetextActivities.media', 'unitGames.mcqActivities', 'unitGames.mcqActivities.media', 'unitGames.inventoryItem', 'unitGames.inventoryItem.media', 'unitGames.inventoryItem.inventoryDoc', 'unitGames.POI'])
-      .exec(function (err, mlgs) {
+    .deepPopulate(['startpage','endPage', 'badge', 'unitgameActivities', 'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 'unitgameActivities.POI'])
+    .exec(function (err, mlgs) {
         res.send(mlgs)
       })
   });
-  //handle reception lgof a complete game
-  app.post('/mlg', function (req, res) {
-    var newMLG = new MLG();
-    var toSend = {
-      activityName: req.body.activityName
-    }
-  })
 
 
-  app.get('/unitgame/:id', function (req, res) {
-    Game.find({
-      '_id': req.params.id,
-    })
-      .populate('startMedia')
-      .populate('feedbackMedia')
-      .populate('POI')
-      .populate('inventoryItem')
-      .exec(function (err, game) {
-        res.send(game);
-      })
-
-
-  })
 
   app.get('/inventory/:id', function (req, res) {
     InventoryItem.find({
