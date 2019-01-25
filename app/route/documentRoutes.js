@@ -323,7 +323,7 @@ app.get('/foliaInstancesCSV', function (req, res) {
 
   app.get('/listActivities', function (req, res) {
     MLG.find({})
-    .deepPopulate(['startpage','endPage', 'badge', 'unitgameActivities', 'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 'unitgameActivities.POI'])
+    .deepPopulate(['startpage','endPage', 'badge','badge.media' ,'unitgameActivities', 'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 'unitgameActivities.POI'])
     .exec(function (err, mlgs) {
         res.send(mlgs)
       })
