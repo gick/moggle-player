@@ -24,7 +24,7 @@ var gameSchema = mongoose.Schema({
     owner: String,
     status: { type: String, default: 'Private' },
     
-    identificationActivity:{type:Schema.Types.ObjectId,ref:'Folia'},
+    foliaActivities:{type:Schema.Types.ObjectId,ref:'Folia'},
     freetextActivities: [{ type: Schema.Types.ObjectId, ref: 'FreeText' }],
     mcqActivities: [{ type: Schema.Types.ObjectId, ref: 'MCQ' }],
 

@@ -2,7 +2,7 @@
   "name": "generator-rev-server",
   "node-main": "localserver.js",
   "main": "http://localhost:8080",
-    "dependencies": {
+  "dependencies": {
     "@toverux/expresse": "^2.4.0",
     "async": "^2.6.0",
     "base64-img": "^1.0.4",
@@ -12,6 +12,7 @@
     "busboy-body-parser": "^0.3.0",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
+    "cors": "^2.8.5",
     "data-uri-to-buffer": "^2.0.0",
     "eventsource": "^1.0.5",
     "express": "~4.14.0",
@@ -20,6 +21,7 @@
     "fs": "0.0.1-security",
     "gridfs": "^1.0.0",
     "gridfs-stream": "^1.1.1",
+    "http-proxy": "^1.17.0",
     "http-proxy-middleware": "^0.17.4",
     "https": "^1.0.0",
     "mem-fs": "^1.1.3",

@@ -1,4 +1,4 @@
-module.exports = function (app, gfs, passport) {
+module.exports = function (app, gfs) {
 
   // Route for serving dynamic content (documents stored in mongodb)
   var base64Img = require('base64-img');
@@ -37,11 +37,6 @@ module.exports = function (app, gfs, passport) {
         res.status(200).send(foliaInstance)
       })
   })
-  app.post('/login', passport.authenticate('local-login', {
-    successRedirect: '/profile', // if authentification succeeds, /profile will return user info
-    failureRedirect: '/profile', // if authentification fails, /profile will return {success:false}
-    failureFlash: true // allow flash messages
-  }));
 
   app.get('/logout', function (req, res) {
     req.logout();
@@ -287,9 +282,9 @@ app.get('/foliaInstancesCSV', function (req, res) {
   });
 
   app.post('/qrscan', function (req, res) {
-    var path = 'filetest.jpg',
-      buffer = req.files.file.data;
 
+    var path = 'filetest.jpg',
+      buffer = req.files.files.data;
     fs.open(path, 'w', function (err, fd) {
       if (err) {
         throw 'error opening file: ' + err;
@@ -323,7 +318,13 @@ app.get('/foliaInstancesCSV', function (req, res) {
 
   app.get('/listActivities', function (req, res) {
     MLG.find({})
-    .deepPopulate(['startpage','endPage', 'badge','badge.media' ,'unitgameActivities', 'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 'unitgameActivities.POI'])
+    .deepPopulate(['startpage','endPage', 'badge','badge.media' ,'unitgameActivities', 
+    'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 
+    'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 
+    'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 
+    'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 
+    'unitgameActivities.POI','unitgameActivities.freetextActivities.media',
+    'unitgameActivities.foliaActivities'])
     .exec(function (err, mlgs) {
         res.send(mlgs)
       })
