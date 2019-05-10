@@ -10,6 +10,7 @@ module.exports = function (app, gfs) {
   var InventoryItem = require('../models/inventoryItem.js')
   var Badge = require('../models/badge.js')
   var FreeText = require('../models/freetext.js')
+  var UserData = require('../models/userData.js')
   var POI = require('../models/poi.js')
   var StaticMedia = require('../models/staticmedia.js')
   var FoliaExec = require('../models/foliaExec.js')
@@ -31,9 +32,13 @@ module.exports = function (app, gfs) {
     }
   });
   app.get('/foliaInstance/:id', function (req, res) {
-    FoliaExec.findOne({ _id: req.params.id })
+    FoliaExec.findOne({
+        _id: req.params.id
+      })
       .exec(function (err, foliaInstance) {
-        if (err) { res.status(400).send('Instance not found') }
+        if (err) {
+          res.status(400).send('Instance not found')
+        }
         res.status(200).send(foliaInstance)
       })
   })
@@ -87,8 +92,8 @@ module.exports = function (app, gfs) {
 
   });
 
-//Posting leaf create a foliaExec instance that will be populated
-// during Folia execution 
+  //Posting leaf create a foliaExec instance that will be populated
+  // during Folia execution 
   app.post('/leaf', function (req, res) {
     var part = req.files;
     var writestream = gfs.createWriteStream({
@@ -139,7 +144,7 @@ module.exports = function (app, gfs) {
           })
         } else {
           result.coloriageFileBase64 = req.body.dataURI
-          result.colorFilename=result.leafFilename+'_color.png'
+          result.colorFilename = result.leafFilename + '_color.png'
           result.save()
           res.send({
             success: true,
@@ -150,8 +155,86 @@ module.exports = function (app, gfs) {
 
       })
   });
+  app.get('/api/userData', function (req, res) {
+    UserData.find({})
+      .deepPopulate(['badge','badge.media'])
+      .exec(function (err, response) {
+        res.send(response)
+      })
+  })
 
+  app.post('/api/badges',function(req,res){
+    let id = req.body.id
+    let badge = req.body.badge
+    UserData.findOne({
+        userId: id
+      })
+    .exec(function(err,result){
+      if(result){
+        let hasBadge=result.badge.findIndex(val=>val._id==badge._id)
+        if(hasBadge==-1){
+          result.badge.push(badge._id)
+          result.save()
+          res.send({success:true})
+        }
+      }
+      else{
+        let userData = new UserData()
+        userData.userId = id
+        userData.badge.push(badge._id)
 
+        userData.save(function (err) {
+          console.log(err)
+        })
+        res.send({success:true})
+      }
+    })
+
+  })
+  app.post('/api/score', function (req, res) {
+    let score = req.body.score
+    let id = req.body.id
+    let activityId = req.body.activityId
+    UserData.findOne({
+        userId: id
+      })
+      .exec(function (err, result) {
+        if (result) {
+          console.log(result)
+          let index = result.score.findIndex(val => val.activity == activityId)
+          console.log(index)
+          if (index!=-1) {
+            result.score.splice(index, 1, {
+              activity: activityId,
+              score: score
+            })
+          } else {
+            result.score.push({
+              activity: activityId,
+              score: score
+            })
+          }
+          console.log(result)
+          result.save(function (err) {
+            console.log(err)
+          })
+        } else {
+          let userData = new UserData()
+          userData.userId = id
+          userData.score.push({
+            activity: activityId,
+            score: score
+          })
+
+          userData.save(function (err) {
+            console.log(err)
+          })
+        }
+        res.send({
+          success: true
+        })
+      })
+  })
 
 
   app.post('/userfile', function (req, res) {
@@ -216,47 +299,51 @@ module.exports = function (app, gfs) {
     })
   });
   app.get('/foliaInstances', function (req, res) {
-   
-      FoliaExec.find({}, function (err, results) {
-        for(var i=0;i<results.length;i++){
-          var writestream=fs.createWriteStream('/home/gick/demoData/' + results[i].leafId + '.jpg')
-          var readstream=gfs.createReadStream({_id:results[i].leafId})
-          readstream.pipe(writestream)
-        }
-        res.send(results)
-      })
-    
-  });
-  app.get('/foliaInstancesColor', function (req, res) {
-   
+
     FoliaExec.find({}, function (err, results) {
-      for(var i=0;i<results.length;i++){
-        if(results[i].coloriageFileBase64){
-        let coloriageBase64 = results[i].coloriageFileBase64.replace(
-          /^data:image\/png;base64,/,
-          ""
-        );
-    
-        fs.writeFile('/home/gick/demoData/' + results[i].leafId + '_coloriage.png',coloriageBase64,'base64')
-      }}
+      for (var i = 0; i < results.length; i++) {
+        var writestream = fs.createWriteStream('/home/gick/demoData/' + results[i].leafId + '.jpg')
+        var readstream = gfs.createReadStream({
+          _id: results[i].leafId
+        })
+        readstream.pipe(writestream)
+      }
       res.send(results)
     })
-  
-});
 
-app.get('/foliaInstancesCSV', function (req, res) {
-   
-  FoliaExec.find({}, function (err, results) {
-    for(var i=0;i<results.length;i++){
-      if(results[i].resultCSV){
-      var filename=results[i].leafId +'result.csv'
-      var str=JSON.stringify(results[i].resultCSV)
-      fs.writeFile('/home/gick/demoData/' + filename,str)
-    }}
-    res.send(results)
-  })
+  });
+  app.get('/foliaInstancesColor', function (req, res) {
 
-});
+    FoliaExec.find({}, function (err, results) {
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].coloriageFileBase64) {
+          let coloriageBase64 = results[i].coloriageFileBase64.replace(
+            /^data:image\/png;base64,/,
+            ""
+          );
+
+          fs.writeFile('/home/gick/demoData/' + results[i].leafId + '_coloriage.png', coloriageBase64, 'base64')
+        }
+      }
+      res.send(results)
+    })
+
+  });
+
+  app.get('/foliaInstancesCSV', function (req, res) {
+
+    FoliaExec.find({}, function (err, results) {
+      for (var i = 0; i < results.length; i++) {
+        if (results[i].resultCSV) {
+          var filename = results[i].leafId + 'result.csv'
+          var str = JSON.stringify(results[i].resultCSV)
+          fs.writeFile('/home/gick/demoData/' + filename, str)
+        }
+      }
+      res.send(results)
+    })
+
+  });
 
 
 
@@ -281,10 +368,15 @@ app.get('/foliaInstancesCSV', function (req, res) {
     }
   });
 
-  app.post('/qrscan', function (req, res) {
+  app.post('/api/qrscan', function (req, res) {
+  
+    var path = 'filetest.jpg'
+      console.log(req.files.files)
+      console.log(req.files.file)
 
-    var path = 'filetest.jpg',
+
       buffer = req.files.files.data;
+      
     fs.open(path, 'w', function (err, fd) {
       if (err) {
         throw 'error opening file: ' + err;
@@ -316,16 +408,17 @@ app.get('/foliaInstancesCSV', function (req, res) {
     })
   });
 
-  app.get('/listActivities', function (req, res) {
+  app.get('/api/listActivities', function (req, res) {
     MLG.find({})
-    .deepPopulate(['startpage','endPage', 'badge','badge.media' ,'unitgameActivities', 
-    'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia', 
-    'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities', 
-    'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem', 
-    'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc', 
-    'unitgameActivities.POI','unitgameActivities.freetextActivities.media',
-    'unitgameActivities.foliaActivities'])
-    .exec(function (err, mlgs) {
+      .deepPopulate(['startpage', 'endPage', 'badge', 'badge.media', 'unitgameActivities',
+        'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia',
+        'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities',
+        'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem',
+        'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc',
+        'unitgameActivities.POI', 'unitgameActivities.freetextActivities.media',
+        'unitgameActivities.foliaActivities'
+      ])
+      .exec(function (err, mlgs) {
         res.send(mlgs)
       })
   });
@@ -334,8 +427,8 @@ app.get('/foliaInstancesCSV', function (req, res) {
 
   app.get('/inventory/:id', function (req, res) {
     InventoryItem.find({
-      '_id': req.params.id,
-    })
+        '_id': req.params.id,
+      })
       .populate('media')
       .populate('inventoryDoc')
       .exec(function (err, results) {
@@ -346,7 +439,8 @@ app.get('/foliaInstancesCSV', function (req, res) {
   app.get('/badge/:id', function (req, res) {
     Badge.find({
       '_id': req.params.id,
-    }, function (err, badge) {leafFileName
+    }, function (err, badge) {
+      leafFileName
       res.send(badge);
     })
 

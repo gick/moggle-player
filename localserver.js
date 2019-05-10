@@ -12,6 +12,7 @@ var proxy       = require('http-proxy-middleware');
 let cors=require('cors')
 var httpProxy = require('http-proxy');
 var proxy = httpProxy.createProxyServer({ ws: true });
+var busboyBodyParser = require('busboy-body-parser')
 
 var morgan       = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -48,10 +49,17 @@ app.use(cors({
 app.get('/socket.io/*', function(req, res) {
     //console.log("proxying GET request", req.url);
     proxy.web(req, res, { target: 'http://localhost:8081'});
+    proxy.on('error',function(e){
+      //console.log(e)
+    })
+
   });
 app.post('/socket.io/*', function(req, res) {
     //console.log("proxying POST request", req.url);
     proxy.web(req, res, { target: 'http://localhost:8081'});
+    proxy.on('error',function(e){
+      //console.log(e)
+    })
   });
   app.post('/setupImages', function(req, res) {
     console.log("proxying setup Image", req.url);
@@ -63,7 +71,7 @@ app.post('/socket.io/*', function(req, res) {
     limit: '50mb'
 }))
 app.use(BodyParser.json({limit: '50mb'}))
-
+app.use(busboyBodyParser())
     // required for passport
 app.use(flash()); // use connect-flash for flash messages stored in session
 var gfs = new Grid(mongoose.connection.db);
