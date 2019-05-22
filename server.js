@@ -6,7 +6,6 @@ var https=require('https')
 var fs = require('fs')
 var mongoose = require('mongoose');
 var Grid = require('gridfs-stream');
-var proxy       = require('http-proxy-middleware');
 var httpProxy = require('http-proxy');
 var proxy = httpProxy.createProxyServer({ ws: true });
 var busboyBodyParser = require('busboy-body-parser')
@@ -32,6 +31,9 @@ app.use(busboyBodyParser())
 var gfs = new Grid(mongoose.connection.db);
 app.post('/api/setupImages', function(req, res) {
   proxy.web(req, res, { target: 'http://localhost:8081'});
+});
+proxy.on('error', function(e) {
+  console.log(e)
 });
 
 require('./app/route/staticRoutes.js')(app); // load satic routes 
