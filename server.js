@@ -35,6 +35,25 @@ app.post('/api/setupImages', function(req, res) {
 proxy.on('error', function(e) {
   console.log(e)
 });
+proxy.on('proxyRes', function (proxyRes, req, res) {
+  console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+});
+
+//
+// Listen for the `open` event on `proxy`.
+//
+proxy.on('open', function (proxySocket) {
+  // listen for messages coming FROM the target here
+  proxySocket.on('data', hybiParseAndLogMessage);
+});
+
+//
+// Listen for the `close` event on `proxy`.
+//
+proxy.on('close', function (res, socket, head) {
+  // view disconnected websocket connections
+  console.log('Client disconnected');
+});
 
 require('./app/route/staticRoutes.js')(app); // load satic routes 
 require('./app/route/documentRoutes.js')(app,gfs); // load routes to services
