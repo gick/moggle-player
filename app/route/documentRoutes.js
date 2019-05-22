@@ -15,146 +15,17 @@ module.exports = function (app, gfs) {
   var StaticMedia = require('../models/staticmedia.js')
   var FoliaExec = require('../models/foliaExec.js')
   var Folia = require('../models/folia.js')
+  var YouTube = require('../models/youtube.js')
 
   var zbarimg = require('zbarimg')
   var spawn = require('child_process').spawn;
   var fs = require('fs');
-  app.get('/profile', function (req, res) {
-    if (req.isAuthenticated()) {
-      res.json({
-        success: true,
-        user: req.user
-      })
-    } else {
-      res.json({
-        success: false
-      })
-    }
-  });
-  app.get('/foliaInstance/:id', function (req, res) {
-    FoliaExec.findOne({
-        _id: req.params.id
-      })
-      .exec(function (err, foliaInstance) {
-        if (err) {
-          res.status(400).send('Instance not found')
-        }
-        res.status(200).send(foliaInstance)
-      })
-  })
 
-  app.get('/logout', function (req, res) {
-    req.logout();
-    res.redirect('/');
-  });
 
-  app.post('/user', function (req, res) {
-    if (!req.isAuthenticated()) {
-      res.send({
-        success: false,
-        message: "Please authenticate"
-      });
-      return;
-    }
+ 
 
-    for (var i = 0; i < user.scores.length; i++) {
-      if (user.scores[i].id == req.body.id) {
-        toUpdate.scores[i].score = req.body.score;
-        toUpdate.save(function (err) {
-          if (err) {
-            console.log(err)
-            res.send({
-              success: false
-            })
-          } else res.send({
-            success: true
-          })
 
-        })
-      } else {
-        toUpdate.scores.push({
-          id: req.body.id,
-          score: req.body.score
-        });
-        toUpdate.save(function (err) {
-          if (err) {
-            console.log(err)
-            res.send({
-              success: false
-            })
-          } else res.send({
-            success: true
-          })
-
-        })
-      }
-    }
-
-  });
-
-  //Posting leaf create a foliaExec instance that will be populated
-  // during Folia execution 
-  app.post('/leaf', function (req, res) {
-    var part = req.files;
-    var writestream = gfs.createWriteStream({
-      mode: 'w',
-      content_type: part.file.mimetype,
-      metadata: {}
-    });
-    writestream.write(part.file.data);
-
-    writestream.on('close', function (fileInfo) {
-      var foliaExec = new FoliaExec()
-      foliaExec.leafId = fileInfo._id
-      foliaExec.playerID = req.body.userId
-      foliaExec.leafFilename = fileInfo._id
-      foliaExec.leafContentType = fileInfo.contentType
-      foliaExec.leafLength = fileInfo.length
-      foliaExec.save(function (err) {
-        if (err) {
-          res.send({
-            success: false
-          })
-        } else res.send({
-          success: true,
-          resource: foliaExec,
-          operation: 'create'
-        })
-      })
-
-    })
-    writestream.end();
-
-  });
-
-  app.post('/coloriage/:id', function (req, res) {
-    if (!req.params.id) {
-      res.send({
-        success: false,
-        operation: 'create',
-        message: 'No folia id provided'
-      })
-    }
-
-    FoliaExec.findById(req.params.id)
-      .exec(function (err, result) {
-        if (err) {
-          res.send({
-            success: false
-          })
-        } else {
-          result.coloriageFileBase64 = req.body.dataURI
-          result.colorFilename = result.leafFilename + '_color.png'
-          result.save()
-          res.send({
-            success: true,
-            resource: result,
-            operation: 'update'
-          })
-        }
-
-      })
-  });
+ 
   app.get('/api/userData', function (req, res) {
     UserData.find({})
       .deepPopulate(['badge','badge.media'])
@@ -237,136 +108,10 @@ module.exports = function (app, gfs) {
   })
 
 
-  app.post('/userfile', function (req, res) {
-    var part = req.files;
-    var writestream = gfs.createWriteStream({
-      filename: part.file.name,
-      mode: 'w',
-      content_type: part.file.mimetype,
-      metadata: {}
-    });
-    writestream.write(part.file.data);
-
-    writestream.on('close', function (fileInfo) {
-      res.send({
-        _id: fileInfo._id,
-        success: true,
-
-      });
-
-    })
-    writestream.end();
-
-  });
-
-  app.post('/user/badges', function (req, res) {
-    if (!req.isAuthenticated()) {
-      res.send({
-        success: false,
-        message: "Please authenticate"
-      });
-      return;
-    }
-    User.findById(req.user._id, function (err, toUpdate) {
-      console.log("User found, request id : " + req.body.id);
-      if (!toUpdate) {
-        console.log("Err, user with id " + req.user._id + " does not exists")
-      }
-      var i = 0;
-      while ((toUpdate.badges[i] != req.body.id) && (i < toUpdate.badges.length)) {
-        i++;
-      }
-      if (toUpdate.badges[i] == req.body.id) {
-        res.send({
-          success: false,
-          message: "Badge already acquired"
-        });
-      } else {
-        console.log("Adding badge " + req.body.id)
-        i += 1;
-        toUpdate.badges.push(req.body.id);
-        toUpdate.save(function (err) {
-          if (err) {
-            console.log(err)
-            return 500;
-          }
-          res.send({
-            success: true,
-            message: "badge added"
-          })
-        });
-      }
-    })
-  });
-  app.get('/foliaInstances', function (req, res) {
-
-    FoliaExec.find({}, function (err, results) {
-      for (var i = 0; i < results.length; i++) {
-        var writestream = fs.createWriteStream('/home/gick/demoData/' + results[i].leafId + '.jpg')
-        var readstream = gfs.createReadStream({
-          _id: results[i].leafId
-        })
-        readstream.pipe(writestream)
-      }
-      res.send(results)
-    })
-
-  });
-  app.get('/foliaInstancesColor', function (req, res) {
-
-    FoliaExec.find({}, function (err, results) {
-      for (var i = 0; i < results.length; i++) {
-        if (results[i].coloriageFileBase64) {
-          let coloriageBase64 = results[i].coloriageFileBase64.replace(
-            /^data:image\/png;base64,/,
-            ""
-          );
-
-          fs.writeFile('/home/gick/demoData/' + results[i].leafId + '_coloriage.png', coloriageBase64, 'base64')
-        }
-      }
-      res.send(results)
-    })
-
-  });
-
-  app.get('/foliaInstancesCSV', function (req, res) {
-
-    FoliaExec.find({}, function (err, results) {
-      for (var i = 0; i < results.length; i++) {
-        if (results[i].resultCSV) {
-          var filename = results[i].leafId + 'result.csv'
-          var str = JSON.stringify(results[i].resultCSV)
-          fs.writeFile('/home/gick/demoData/' + filename, str)
-        }
-      }
-      res.send(results)
-    })
-
-  });
 
 
 
-  app.get('/user/badges', function (req, res) {
-    if (!req.isAuthenticated()) {
-      res.send({
-        success: false,
-        message: "Please authenticate"
-      });
-      return;
-    } else {
-      User.findById(req.user._id, function (err, user) {
-        var badgeArray = []
-        for (var i = 1; i < user.badges.length; i++) {
-          var badgeTemp = {
-            id: user.badges[i]
-          }
-          badgeArray.push(badgeTemp)
-        }
-        res.send(badgeArray)
-      })
-    }
-  });
+
 
   app.post('/api/qrscan', function (req, res) {
   
@@ -399,115 +144,6 @@ module.exports = function (app, gfs) {
     });
 
   })
-
-  app.get('/listAllFiles', function (req,
-    res) {
-    console.log(req)
-    gfs.files.find({}).toArray(function (err, files) {
-      res.send(files);
-    })
-  });
-
-  app.get('/api/listActivities', function (req, res) {
-    MLG.find({})
-      .deepPopulate(['startpage', 'endPage', 'badge', 'badge.media', 'unitgameActivities',
-        'unitgameActivities.startMedia', 'unitgameActivities.feedbackMedia',
-        'unitgameActivities.freetextActivities', 'unitgameActivities.mcqActivities',
-        'unitgameActivities.mcqActivities.media', 'unitgameActivities.inventoryItem',
-        'unitgameActivities.inventoryItem.media', 'unitgameActivities.inventoryItem.inventoryDoc',
-        'unitgameActivities.POI', 'unitgameActivities.freetextActivities.media',
-        'unitgameActivities.foliaActivities'
-      ])
-      .exec(function (err, mlgs) {
-        res.send(mlgs)
-      })
-  });
-
-
-
-  app.get('/inventory/:id', function (req, res) {
-    InventoryItem.find({
-        '_id': req.params.id,
-      })
-      .populate('media')
-      .populate('inventoryDoc')
-      .exec(function (err, results) {
-        res.send(results)
-      })
-  })
-
-  app.get('/badge/:id', function (req, res) {
-    Badge.find({
-      '_id': req.params.id,
-    }, function (err, badge) {
-      leafFileName
-      res.send(badge);
-    })
-
-  })
-
-  app.get('/freetext/:id', function (req, res) {
-    FreeText.find({
-      '_id': req.params.id,
-    }, function (err, game) {
-      res.send(game);
-    })
-
-  })
-  app.get('/poi/:id', function (req, res) {
-    POI.find({
-      '_id': req.params.id,
-    }, function (err, pois) {
-      res.send(pois);
-    })
-
-  })
-
-  app.get('/question/:id', function (req, res) {
-    FreeText.find({
-      '_id': req.params.id,
-    }, function (err, game) {
-      if (game && game[0]) {
-        console.log("game ")
-        console.log(game)
-        res.send(game)
-      } else
-        MCQ.find({
-          '_id': req.params.id,
-        }, function (err2, game2) {
-          console.log("freetext")
-          console.log(game2)
-          res.send(game2);
-        })
-
-
-    })
-
-  })
-
-  app.get('/mcq/:id', function (req, res) {
-    MCQ.find({
-      '_id': req.params.id,
-    }, function (err, game) {
-      res.send(game);
-    })
-
-  })
-
-  app.get('/staticmedia/:id', function (req, res) {
-    console.log(req.params.id)
-    console.log(req.params)
-    StaticMedia.find({
-      '_id': req.params.id,
-    }, function (err, staticMedia) {
-      res.send(staticMedia);
-    })
-
-  })
-
-
-
-
   app.get('/file/:id', function (req, res) {
     if (req.headers.range) {
       gfs.findOne({
@@ -583,6 +219,15 @@ module.exports = function (app, gfs) {
 
     }
   });
+
+  app.get('/api/listActivities', function (req, res) {
+    MLG.find({})
+      .exec(function (err, mlgs) {
+        res.send(mlgs)
+      })
+  });
+
+
 
 
 }

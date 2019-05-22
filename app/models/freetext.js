@@ -14,10 +14,11 @@ var freeTextSchema = mongoose.Schema({
     response: String,
     type: { type: String, default: 'freetext' },
     typeLabel: { type: String, default: 'Free text question' },
-    media: { type: Schema.Types.ObjectId, ref: 'StaticMedia' },
+    media: { type: Schema.Types.ObjectId, ref: 'StaticMedia',autopopulate:true },
 
     wrongMessage: String,
     correctMessage: String
 })
+freeTextSchema.plugin(require('mongoose-autopopulate'))
 
 module.exports = mongoose.model('FreeText', freeTextSchema);

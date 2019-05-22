@@ -46,22 +46,7 @@ app.use(cors({
     credentials: true // enable set cookie
 }
 ));
-app.get('/socket.io/*', function(req, res) {
-    //console.log("proxying GET request", req.url);
-    proxy.web(req, res, { target: 'http://localhost:8081'});
-    proxy.on('error',function(e){
-      //console.log(e)
-    })
-
-  });
-app.post('/socket.io/*', function(req, res) {
-    //console.log("proxying POST request", req.url);
-    proxy.web(req, res, { target: 'http://localhost:8081'});
-    proxy.on('error',function(e){
-      //console.log(e)
-    })
-  });
-  app.post('/setupImages', function(req, res) {
+  app.post('/api/setupImages', function(req, res) {
     console.log("proxying setup Image", req.url);
     proxy.web(req, res, { target: 'http://localhost:8081'});
   });
@@ -77,8 +62,6 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 var gfs = new Grid(mongoose.connection.db);
 // routes ======================================================================
 require('./app/route/staticRoutes.js')(app); // load our routes and pass in our app and fully configured passport
-require('./app/route/fileRoutes.js')(app,gfs);
-require('./app/route/sseMiddleWare.js')(app)
 require('./app/route/documentRoutes.js')(app,gfs);
 
 //require('./app/route/imageAnalysisRoute.js')(app, gfs,passport);
