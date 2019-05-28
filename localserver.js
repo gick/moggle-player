@@ -49,6 +49,30 @@ app.use(cors({
   app.post('/api/setupImages', function(req, res) {
     console.log("proxying setup Image", req.url);
     proxy.web(req, res, { target: 'http://localhost:8081'});
+      proxy.on('error', function(e) {
+    console.log(e)
+  });
+  proxy.on('proxyRes', function (proxyRes, req, res) {
+    console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+  });
+  
+  //
+  // Listen for the `open` event on `proxy`.
+  //
+  proxy.on('open', function (proxySocket) {
+    // listen for messages coming FROM the target here
+    proxySocket.on('data', hybiParseAndLogMessage);
+  });
+  
+  //
+  // Listen for the `close` event on `proxy`.
+  //
+  proxy.on('close', function (res, socket, head) {
+    // view disconnected websocket connections
+    console.log('Client disconnected');
+  });
+  
+
   });
 
   app.use(BodyParser.urlencoded({
@@ -63,6 +87,7 @@ var gfs = new Grid(mongoose.connection.db);
 // routes ======================================================================
 require('./app/route/staticRoutes.js')(app); // load our routes and pass in our app and fully configured passport
 require('./app/route/documentRoutes.js')(app,gfs);
+require('./app/route/loggerRoute.js')(app); // load our routes and pass in our app and fully configured passport
 
 //require('./app/route/imageAnalysisRoute.js')(app, gfs,passport);
 

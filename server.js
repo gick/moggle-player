@@ -17,6 +17,17 @@ var configDB = require('./app/config/database.js');
 /////////////////////////////////////////////
 
 var app = express()
+app.use(function(req, res, next) {
+  res.header('Access-Control-Allow-Credentials', true);
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept');
+  if ('OPTIONS' == req.method) {
+       res.send(200);
+   } else {
+       next();
+   }
+  });
 
 app.use(BodyParser.urlencoded({
   extended: true,
@@ -31,30 +42,31 @@ app.use(busboyBodyParser())
 var gfs = new Grid(mongoose.connection.db);
 app.post('/api/setupImages', function(req, res) {
   proxy.web(req, res, { target: 'http://localhost:8081'});
+  proxy.on('error', function(e) {
+    console.log(e)
+  });
+  proxy.on('proxyRes', function (proxyRes, req, res) {
+    console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+  });
+  
+  //
+  // Listen for the `open` event on `proxy`.
+  //
+  proxy.on('open', function (proxySocket) {
+    // listen for messages coming FROM the target here
+    proxySocket.on('data', hybiParseAndLogMessage);
+  });
+  
+  //
+  // Listen for the `close` event on `proxy`.
+  //
+  proxy.on('close', function (res, socket, head) {
+    // view disconnected websocket connections
+    console.log('Client disconnected');
+  });
+  
+  
 });
-proxy.on('error', function(e) {
-  console.log(e)
-});
-proxy.on('proxyRes', function (proxyRes, req, res) {
-  console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
-});
-
-//
-// Listen for the `open` event on `proxy`.
-//
-proxy.on('open', function (proxySocket) {
-  // listen for messages coming FROM the target here
-  proxySocket.on('data', hybiParseAndLogMessage);
-});
-
-//
-// Listen for the `close` event on `proxy`.
-//
-proxy.on('close', function (res, socket, head) {
-  // view disconnected websocket connections
-  console.log('Client disconnected');
-});
-
 require('./app/route/staticRoutes.js')(app); // load satic routes 
 require('./app/route/documentRoutes.js')(app,gfs); // load routes to services
 

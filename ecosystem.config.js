@@ -8,7 +8,7 @@ module.exports = {
     // First application
     {
       name      : 'moggle-backend',
-      script    : 'server.js',
+      script    : 'localserver.js',
       env: {
         COMMON_VARIABLE: 'true'
       },
