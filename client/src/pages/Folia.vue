@@ -174,10 +174,11 @@ export default {
 		},
 		parseResult(res) {
 			this.foliaStarted = false
+
 			for (let item of res) {
+				let correct = false
 				let species = _.startCase(item.split(',')[0])
 				let percent = parseInt(item.split(',')[1])
-				let correct = false
 				for (let target of this.data.targetSpecies) {
 					if (target.label == species) {
 						correct = true
@@ -189,6 +190,11 @@ export default {
 					percent: percent,
 					correct: correct
 				})
+			}
+			if(this.correct && this.data.score){
+				this.$toasted.show('Vous avez gagné '+this.data.score+' points',{ duration: 2000,position:'bottom-center',theme:'bubble' } )
+        this.$store.commit('activities/addScore',this.data.score)
+
 			}
 		},
 		handleError() {

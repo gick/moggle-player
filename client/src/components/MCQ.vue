@@ -60,7 +60,7 @@ export default {
   methods: {
     validate() {
       if (this.currentResponse == this.mcq.response) {
-        this.$toasted.show('Vous avez gagner '+this.mcq.score+' points',{ duration: 2000 } )
+        this.$toasted.show('Vous avez gagné '+this.mcq.score+' points',{ duration: 2000,position:'bottom-center',theme:'bubble' } )
         this.$store.commit('activities/addScore',this.mcq.score)
         this.showSuccess = true;
       } else {
