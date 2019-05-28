@@ -14,5 +14,8 @@ results
 npm-debug.log
 node_modules
 
-config/database.js
-config/auth.js
+app/config/database.js
+app/config/auth.js
+client/node_modules
+client/www
+https://github.com/gick/moggle-game.git
