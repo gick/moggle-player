@@ -25,7 +25,7 @@
     "gh-pages": "^1.2.0",
     "image-file-to-base64-exif": "^1.0.3",
     "leaflet": "^1.4.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.19",
     "onsenui": "^2.10.2",
     "reset-image-orientation": "^2.0.0",
     "vue": "^2.6.10",
