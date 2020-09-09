@@ -21,7 +21,7 @@
     "fs": "0.0.1-security",
     "gridfs": "^1.0.0",
     "gridfs-stream": "^1.1.1",
-    "http-proxy": "^1.17.0",
+    "http-proxy": "^1.18.1",
     "http-proxy-middleware": "^0.17.4",
     "https": "^1.0.0",
     "mem-fs": "^1.1.3",
