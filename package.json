@@ -4,7 +4,7 @@
   "main": "http://localhost:8080",
   "dependencies": {
     "@toverux/expresse": "^2.4.0",
-    "async": "^2.6.0",
+    "async": "^3.2.2",
     "base64-img": "^1.0.4",
     "bcrypt-nodejs": "latest",
     "body-parser": "^1.17.1",
